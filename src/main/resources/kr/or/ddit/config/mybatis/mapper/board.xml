@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board">
+	
+	<!-- 모든 게시판 조회 -->
+	<select id="allBoard" resultType="boardvo">
+		SELECT * FROM board_info
+	</select>
+	
+	<!-- 모든 게시판 수 조회 -->
+	<select id="allCountBoard" resultType="Integer">
+		SELECT COUNT(*) FROM board_info
+	</select>
+	
+	<!-- 활성화 된 게시판 조회 -->
+	<select id="useBoard" resultType="boardvo">
+		SELECT bor_nm, bor_num FROM board_info WHERE bor_act = 1
+	</select>
+	
+	<!-- 게시판 이름 또는 상태 변경 -->
+	<update id="updateBoard" parameterType="boardvo">
+		UPDATE  board_info SET bor_nm = #{bor_nm}, bor_act =#{bor_act} WHERE bor_num = #{bor_num}
+	</update>
+	 
+	<!-- 새로운 게시판 생성 -->
+	<insert id="createBoardInfo" parameterType="boardvo">
+		INSERT INTO board_info VALUES(#{bor_nm} , #{bor_num}, #{bor_act})
+	</insert>
+	
+	<!-- 선택한 게시판 정보 -->
+	<select id="selectboardinfo" parameterType="Integer" resultType="boardvo">
+		SELECT * FROM board_info WHERE bor_num = #{bor_num}
+	</select>
+	
+	<!-- 선택된 게시판 게시물 전체 조회 -->
+	<select id="selectBoardContent" parameterType="Integer" resultType="boardpostvo">
+		SELECT * FROM board_post WHERE bor_num = (SELECT bor_num FROM board_info WHERE bor_num = #{bor_num}) ORDER BY post_no DESC
+	</select>
+	
+	<!-- 선택된 게시판 게시물 개수 -->
+	<select id="selectContCount" resultType="Integer" parameterType="Integer">
+		SELECT COUNT(*) FROM board_post WHERE bor_num = #{bor_num}
+	</select>
+	
+	<!-- 새로운 게시글 생성 -->
+	<insert id="newContent" parameterType="boardpostvo">
+		INSERT INTO board_post VALUES(#{post_no} , #{bor_num}, #{user_id} ,#{title} ,#{cont} ,SYSDATE ,#{post_del} ,#{lft} , #{post_no2}, #{user_id2}, #{bor_num2})
+	</insert>
+	
+	<!-- 최신번호 가져오기 -->
+	<select id="maxNumber" parameterType="Integer" resultType="Integer">
+		SELECT COUNT(*) FROM board_post WHERE bor_num =#{bor_num}
+	</select>
+	
+	<!-- 첨부파일 저장 -->
+	<insert id="attachFile" parameterType="attachvo">
+		INSERT INTO attach VALUES(SEQ_FILENUM.NEXTVAL, #{post_no}, #{bor_num}, #{user_id}, #{file_nm}, #{file_path})
+	</insert>
+	
+	<!-- 선택된 게시글 상세보기 -->
+	<select id="selectBoardDetail" parameterType="boardpostvo" resultType="boardpostvo">
+		SELECT * FROM board_post WHERE bor_num = #{bor_num} AND post_no = #{post_no}
+	</select>
+	
+	<!-- 게시글 수정 -->
+	<update id="modifyContent" parameterType="boardpostvo">
+		UPDATE board_post SET title=#{title}, cont = #{cont}, reg_dt=SYSDATE WHERE post_no = #{post_no} AND user_id = #{user_id} AND bor_num = #{bor_num}
+	</update>
+	
+	<!-- 게시글 삭제 -->
+	<update id="deleteContent" parameterType="boardpostvo">
+		UPDATE board_post SET post_del = 0 WHERE post_no = #{post_no} AND user_id = #{user_id} AND bor_num = #{bor_num}
+	</update>
+	<!-- 페이징 -->
+	<select id="paging" parameterType="pagevo" resultType="boardpostvo">
+		SELECT *
+			FROM 
+			    (SELECT ROWNUM rn, a.*
+			      FROM
+			        (SELECT *
+			         FROM board_post
+			         WHERE bor_num = #{bor_num}
+			         ORDER BY  POST_NO DESC) a
+			     WHERE ROWNUM &lt;= #{page} * #{pageSize}) 
+			WHERE rn BETWEEN (#{page}-1) * #{pageSize} +1 AND #{page} * #{pageSize}
+	</select>
+	
+	<!-- 계층 페이징 -->
+	<select id="layerPaging" parameterType="pagevo" resultType="boardpostvo">
+		SELECT *
+		FROM 
+		    (SELECT ROWNUM rn, b.*
+		      FROM
+		        (SELECT a.post_no, a.title, a.lft, a.post_del, a. user_id, a.reg_dt
+		            FROM
+		                (SELECT post_no,LPAD(' ',(LEVEL-1) *3) || title title, bor_num, lft, post_del, user_id, reg_dt
+		                FROM board_post
+		                START WITH lft = 0
+		                CONNECT BY PRIOR post_no = Post_no2
+		                ORDER SIBLINGS BY post_no DESC) a
+		            WHERE a.bor_num = #{bor_num}) b
+		     WHERE ROWNUM &lt;= #{page} * #{pageSize}) 
+		WHERE rn BETWEEN (#{page}-1) * #{pageSize} +1 AND #{page} * #{pageSize}
+	</select>
+	
+	<!-- 첨부파일 가져오기 -->
+	<select id="selectattach" parameterType="Integer" resultType="attachvo">
+		SELECT * FROM attach WHERE post_no =#{post_no}
+	</select>
+	
+	<!-- 현재 게시글에 등록된 댓글 수 -->
+	<select id="countPostCom" resultType="Integer">
+		SELECT COUNT(*) FROM post_com
+	</select>
+	
+	<!-- 현재 게시글에 등록된 댓글 가져오기 -->
+	<select id="allPostCom" parameterType="Integer" resultType="postcomvo">
+		SELECT * FROM post_com WHERE post_no = #{post_no}
+	</select>
+	
+	<!-- 댓글 생성 -->
+	<insert id="savePostCom" parameterType="postcomvo">
+		INSERT INTO post_com VALUES (#{com_no},#{com_user_id}, SYSDATE, #{com_con}, 1, #{lft}, #{post_no}, #{bor_num}, #{user_id})
+	</insert>
+
+	<!-- 첨부파일 삭제 -->
+	<delete id="deleteAttach" parameterType="attachvo">
+		DELETE FROM attach WHERE file_path =#{file_path} AND user_id =#{user_id} AND post_no =#{post_no}
+	</delete>
+	
+</mapper>
