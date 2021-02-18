@@ -133,7 +133,7 @@ footer {
 				</form>
 				<script>
 							$(document).ready(function() {
-								$("#summernote").summernote('code',"${summer.cont}");
+								$("#summernote").summernote('code','${summer.cont}');
 								$("#summernote").summernote({
 									height: 200,
 								});

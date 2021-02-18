@@ -302,6 +302,21 @@ public class BoardDao implements BoardDaoI{
 	synchronized public int deleteAttach(AttachVo vo) {
 		return	template.delete("board.deleteAttach", vo);
 	}
+	
+	
+	/**
+	 * 
+	 * Method : deletePostCom
+	 * 작성자 : PC-01
+	 * 변경이력 :
+	 * @param vo
+	 * @return
+	 * Method 설명 : 댓글을 삭제한다.
+	 */
+	@Override
+	public int deletePostCom(PostComVo vo) {
+		return template.update("board.deletePostCom",vo);
+	}
 
 
 

@@ -124,7 +124,12 @@
 	<insert id="savePostCom" parameterType="postcomvo">
 		INSERT INTO post_com VALUES (#{com_no},#{com_user_id}, SYSDATE, #{com_con}, 1, #{lft}, #{post_no}, #{bor_num}, #{user_id})
 	</insert>
-
+	
+	<!-- 댓글 삭제 -->
+	<update id="deletePostCom" parameterType="postcomvo">
+		UPDATE post_com SET com_del = 0 WHERE com_no = #{com_no} AND com_user_id = #{com_user_id} AND post_no = #{post_no}
+	</update>
+	
 	<!-- 첨부파일 삭제 -->
 	<delete id="deleteAttach" parameterType="attachvo">
 		DELETE FROM attach WHERE file_path =#{file_path} AND user_id =#{user_id} AND post_no =#{post_no}

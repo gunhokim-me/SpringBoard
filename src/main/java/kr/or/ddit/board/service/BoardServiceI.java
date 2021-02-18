@@ -56,6 +56,9 @@ public interface BoardServiceI {
 	//댓글 생성
 	int savePostCom(PostComVo vo);
 	
+	//댓글 삭제
+	int deletePostCom(PostComVo vo);
+	
 	//현재 게시글에 등록된 댓글 수
 	int countPostCom();
 	

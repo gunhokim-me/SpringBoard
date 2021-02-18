@@ -64,6 +64,9 @@ public interface BoardDaoI {
 	//댓글 생성
 	int savePostCom(PostComVo vo);
 	
+	//댓글 삭제
+	int deletePostCom(PostComVo vo);
+	
 	//답글 등록
 	int createAnsPost(BoardPostVo vo);
 	

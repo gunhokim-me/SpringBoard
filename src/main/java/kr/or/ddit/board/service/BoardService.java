@@ -144,5 +144,10 @@ public class BoardService implements BoardServiceI {
 		return boardDao.deleteAttach(vo);
 	}
 
+	@Override
+	public int deletePostCom(PostComVo vo) {
+		return boardDao.deletePostCom(vo);
+	}
+
 
 }

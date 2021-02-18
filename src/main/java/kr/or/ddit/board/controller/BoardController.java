@@ -126,10 +126,10 @@ public class BoardController {
 		List<AttachVo> attlist = boardService.selectattach(postno);
 		
 		vo.setUser_id(userid);
-		vo.setBor_num(postno);
+		vo.setBor_num(bornum);
 		vo.setPost_no(postno);
 		vo.setTitle(title);
-		vo.setCont(cont);
+		vo.setCont(boardService.selectBoardDetail(vo).getCont());
 		
 		int size = attlist.size();
 		
@@ -370,4 +370,9 @@ public class BoardController {
 		return "redirect:/board/boardcontent";
 	}
 	
+	@RequestMapping(path="deleteComment", method =  RequestMethod.POST )
+	public String deleteCommentPost(PostComVo vo) {
+		boardService.deletePostCom(vo);
+		return "redirect:boarddetailContent?postnum=" + vo.getPost_no() + "&num=" + vo.getBor_num();
+	}
 }

@@ -80,6 +80,14 @@ footer {
 		  }
 	  });
 	  
+	  //댓글 삭제
+	  $(".deletecom").on("click", function(){
+		  no = $(this).val();
+		  $("#com_no").val(no);
+		  $("#comfrm").attr("method", "POST")
+		  $("#comfrm").attr("action", "/board/deleteComment");
+		  $("#comfrm").submit();
+	  });
   });
   </script>
 </head>
@@ -133,9 +141,23 @@ footer {
 				
 				<div>
 				<!-- 댓글이 있으면 출력하는 곳 -->
+				<form id="comfrm">
+							<input type="hidden" id="com_no" name="com_no" value=""/>
+							<input type="hidden" name="com_user_id" value="${sessionScope.S_USER.user_id}"/>
+							<input type="hidden" name="post_no" value="${postDetail.post_no }"/>
+							<input type="hidden" name="bor_num" value="${postDetail.bor_num }"/>
+				</form>
+				
 				<c:forEach items="${postcom }" var="com">
 					<c:if test="${com.com_del == 1 }">
-						<p>${com.com_con } [${com.user_id } / <fmt:formatDate value="${com.com_date }" pattern="yyyy.MM.dd"/>]</p>
+						<c:choose>
+							<c:when test="${com.user_id == sessionScope.S_USER.user_id }">
+								<p>${com.com_con } [${com.user_id } / <fmt:formatDate value="${com.com_date }" pattern="yyyy.MM.dd"/>] <button class="deletecom" value="${com.com_no }">삭제</button></p>
+							</c:when>
+							<c:otherwise>
+								<p>${com.com_con } [${com.user_id } / <fmt:formatDate value="${com.com_date }" pattern="yyyy.MM.dd"/>]</p>
+							</c:otherwise>
+						</c:choose>
 					</c:if>
 					<c:if test="${com.com_del == 0 }">
 						<p>[삭제된 댓글 입니다.]</p>
